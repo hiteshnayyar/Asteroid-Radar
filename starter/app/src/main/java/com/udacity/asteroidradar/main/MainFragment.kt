@@ -17,15 +17,15 @@ class MainFragment : Fragment() {
 //    private val viewModel: MainViewModel by lazy {
 //        ViewModelProvider(this).get(MainViewModel::class.java)
 //    }
-    private val asteroidViewModel: MainViewModel by viewModels {
-        AsteroidViewModelFactory((activity?.application as AsteroidApplication).repository)
+    private val viewModel: MainViewModel by viewModels {
+        AsteroidViewModelFactory((requireNotNull(this.activity).application as AsteroidApplication).repository)
     }
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val binding = FragmentMainBinding.inflate(inflater)
-        binding.lifecycleOwner = this
 
-        binding.viewModel = asteroidViewModel
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
         val recyclerView = binding.asteroidRecycler
         val adapter = AsteroidAdapter()
         recyclerView.adapter = adapter

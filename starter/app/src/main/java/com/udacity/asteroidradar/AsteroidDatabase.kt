@@ -1,6 +1,7 @@
 package com.udacity.asteroidradar
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -8,9 +9,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [Asteroid::class], version = 1)
+@Database(entities = [Asteroid::class], version = 2, exportSchema = false)
 abstract class AsteroidDatabase : RoomDatabase() {
-    abstract fun asteroidDao(): AsteroidDatabaseDao
+    abstract val asteroidDao: AsteroidDatabaseDao
 
     companion object {
         // Singleton prevents multiple instances of database opening at the
@@ -26,7 +27,9 @@ abstract class AsteroidDatabase : RoomDatabase() {
                     context.applicationContext,
                     AsteroidDatabase::class.java,
                     "asteroid_database"
-                ).build()
+                ).fallbackToDestructiveMigration()
+                .addCallback(AsteroidDatabaseCallback(scope))
+                .build()
                 INSTANCE = instance
                 // return instance
                 instance
@@ -43,7 +46,7 @@ abstract class AsteroidDatabase : RoomDatabase() {
             super.onCreate(db)
             INSTANCE?.let { database ->
                 scope.launch {
-                    populateDatabase(database.asteroidDao())
+                    populateDatabase(database.asteroidDao)
                 }
             }
         }
@@ -53,6 +56,7 @@ abstract class AsteroidDatabase : RoomDatabase() {
             //asteroidDatabaseDao.deleteAll()
 
             // Add sample words.
+            Log.i("Populate Asteroid Database","Added Asteroid")
             var asteroid = Asteroid(1,"Hello","",0.0,0.0,0.0,0.0,false)
             asteroidDatabaseDao.insert(asteroid)
         }
