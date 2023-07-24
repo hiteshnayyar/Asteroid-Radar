@@ -2,6 +2,12 @@ package com.udacity.asteroidradar
 
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.LiveData
+import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
+import com.udacity.asteroidradar.main.MainViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.util.*
 import java.util.concurrent.Flow
 
 // Declares the DAO as a private property in the constructor. Pass in the DAO
@@ -19,5 +25,22 @@ class AsteroidRepository (private val asteroidDao:AsteroidDatabaseDao){
     @WorkerThread
     suspend fun insert(asteroid: Asteroid) {
         asteroidDao.insert(asteroid)
+    }
+    suspend fun refreshAsteroids(startDate: String, endDate: String, apiKey: String){
+        withContext(Dispatchers.IO) {
+            //Clear Asteroids for Weekly/Today Selections
+            asteroidDao.clearAllAsteroids()
+            try {
+
+                var jsonStr =
+                    AsteroidApi.retrofitService.getAsteroids(startDate, endDate, apiKey)
+
+                var asteroidList = parseAsteroidsJsonResult(JSONObject(jsonStr))
+                asteroidDao.insertAll(asteroidList)
+            } catch (e: Exception) {
+                //_responseStatus.value = "Failure: ${e.message}"
+            }
+
+        }
     }
 }

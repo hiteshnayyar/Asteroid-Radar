@@ -9,9 +9,10 @@ import kotlinx.android.parcel.Parcelize
 @Parcelize
 @Entity(tableName = "asteroid_table")
 data class Asteroid(
-    @PrimaryKey(autoGenerate=true)
+    @PrimaryKey (autoGenerate=true)
     var id: Long = 0L,
 
+    // used to map img_src from the JSON to imgSrcUrl in our class
     @ColumnInfo(name="code_name")
     var codename: String,
 

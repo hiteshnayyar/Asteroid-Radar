@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@Database(entities = [Asteroid::class], version = 2, exportSchema = false)
+@Database(entities = [Asteroid::class], version = 5, exportSchema = false)
 abstract class AsteroidDatabase : RoomDatabase() {
     abstract val asteroidDao: AsteroidDatabaseDao
 
@@ -52,13 +52,26 @@ abstract class AsteroidDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(asteroidDatabaseDao: AsteroidDatabaseDao) {
-            // Delete all content here.
-            //asteroidDatabaseDao.deleteAll()
-
-            // Add sample words.
-            Log.i("Populate Asteroid Database","Added Asteroid")
-            var asteroid = Asteroid(1,"Hello","",0.0,0.0,0.0,0.0,false)
+            /*
+            // Add sample words
+            var asteroid = Asteroid(1,"Hitesh","10/07/2023",5.7,1000.0,56.0,110.0,false)
             asteroidDatabaseDao.insert(asteroid)
+            Log.i("AsteroidDatabase","Added 1st Asteroid")
+
+            asteroid = Asteroid(2,"Varinder","21/07/2023",6.0,90.0,100.0,10.0,false)
+            asteroidDatabaseDao.insert(asteroid)
+            Log.i("AsteroidDatabase","Added 2nd Asteroid")
+            asteroid = Asteroid(3,"Sarbjit","25/07/2023",2.0,105.0,50.0,20.0,false)
+            asteroidDatabaseDao.insert(asteroid)
+            Log.i("AsteroidDatabase","Added 3rd Asteroid")
+            asteroid = Asteroid(4,"Ranjan","28/07/2023",3.4,130.0,550.0,30.0,false)
+            asteroidDatabaseDao.insert(asteroid)
+            Log.i("AsteroidDatabase","Added 4th Asteroid")
+            asteroid = Asteroid(5,"Gurpreet","30/07/2023",5.6,120.0,110.0,40.0,false)
+            asteroidDatabaseDao.insert(asteroid)
+            Log.i("AsteroidDatabase","Added 5th Asteroid")
+            */
+
         }
     }
 }
