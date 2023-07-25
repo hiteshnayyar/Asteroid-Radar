@@ -1,15 +1,12 @@
 package com.udacity.asteroidradar
 
-import android.graphics.Picture
-import android.provider.ContactsContract.Data
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.udacity.asteroidradar.data.Asteroid
+import com.udacity.asteroidradar.data.PictureOfDay
 import com.udacity.asteroidradar.databinding.AsteroidRecyclerBinding
 import com.udacity.asteroidradar.databinding.HeaderRecyclerBinding
 import kotlinx.coroutines.CoroutineScope
@@ -23,10 +20,10 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         RecyclerView.ViewHolder>(AsteroidsComparator()) {
 
     private val adapterScope = CoroutineScope(Dispatchers.Default)
-    fun addHeaderAndSubmitList(list: List<Asteroid>?,header: List<PictureOfDay>) {
+    fun addHeaderAndSubmitList(list: List<Asteroid>?, header: List<PictureOfDay>) {
         adapterScope.launch {
             val items = when (list) {
-                null -> header.map{DataItem.Header (it)}
+                null -> header.map{null}
                 else -> header.map{DataItem.Header (it)} + list.map {DataItem.AsteroidItem (it)}
             }
             withContext(Dispatchers.Main) {
@@ -46,7 +43,8 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is DataItem.Header -> ITEM_VIEW_TYPE_HEADER
-            is DataItem.AsteroidItem -> ITEM_VIEW_TYPE_ITEM
+            //is DataItem.AsteroidItem -> ITEM_VIEW_TYPE_ITEM
+            else -> ITEM_VIEW_TYPE_ITEM
         }
     }
 

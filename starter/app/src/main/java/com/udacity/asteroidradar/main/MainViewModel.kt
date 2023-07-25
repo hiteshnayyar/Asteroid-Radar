@@ -1,38 +1,50 @@
 package com.udacity.asteroidradar.main
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.*
 import com.udacity.asteroidradar.*
-import kotlinx.coroutines.Dispatchers
+import com.udacity.asteroidradar.data.Asteroid
+import com.udacity.asteroidradar.data.AsteroidRepository
+import com.udacity.asteroidradar.data.PictureOfDay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+enum class WebServiceStatus { LOADING, ERROR, DONE }
 class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
     val apiKey = "HhE8mIraVrXxh3aGMo17ly49qHnwCAb1yt7PHElH"
-    //Picture of Day Status
-    private val _pictureOfDayStatus = MutableLiveData<String>()
-    val pictureOfDayStatus: LiveData<String> get() = _pictureOfDayStatus
 
-    //Picture Of Day
-    private val _pictureOfDay = MutableLiveData<PictureOfDay?>()
-    val pictureOfDay: LiveData<PictureOfDay?> get() = _pictureOfDay
+    //Asteroid Web Service Status
+    private val _asteroidStatus = MutableLiveData<WebServiceStatus>()
+    val asteroidStatus: LiveData<WebServiceStatus> get() = _asteroidStatus
+
+    //Picture of Day Web Service Status
+    private val _pictureOfDayStatus = MutableLiveData<WebServiceStatus>()
+    val pictureOfDayStatus: LiveData<WebServiceStatus> get() = _pictureOfDayStatus
+
 
     //Period for which asteroids to be retrieved
     var _period = MutableLiveData<Int>()
     val period: LiveData<Int> get() = _period
 
+
     //Selected Asteroid
     private var _selectedAsteroid = MutableLiveData<Asteroid?>()
     val selectedAsteroid: LiveData<Asteroid?> get() = _selectedAsteroid
 
-    init{
+    init {
         _period.value = 0
-        getAsteroids()
         getPictureOfDay()
+        getAsteroids()
     }
+
+    //Retrieves List of Asteroids
+    var asteroids = repository.asteroidList
+
+    //Picture Of Day
+    val pictureOfDay: LiveData<PictureOfDay?> = repository.pictureOfDay
+
     fun onAsteroidClicked(asteroid: Asteroid) {
         _selectedAsteroid.value = asteroid
     }
@@ -41,65 +53,75 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
         _selectedAsteroid.value = null
     }
 
-    // Using LiveData and caching what allWords returns has several benefits:
-    // - We can put an observer on the data (instead of polling for changes) and only update the
-    //   the UI when the data actually changes.
-    // - Repository is completely separated from the UI through the ViewModel.
-    val allAsteroid: LiveData<List<Asteroid>> = repository.allAsteroids
-
-    /**
-     * Launching a new coroutine to insert the data in a non-blocking way
-     */
-    fun insert(asteroid: Asteroid) = viewModelScope.launch {
-        repository.insert(asteroid)
-    }
-
-     fun getAsteroids() {
+    fun getAsteroids() {
         viewModelScope.launch {
-            var status: String = ""
+            _asteroidStatus.value = WebServiceStatus.LOADING
+            try {
+                if ((period.value ?: 0) >= 0) {
+                    //Retrieve Asteroids for Current Day/Week
+                    val formatter = SimpleDateFormat("yyyy-MM-dd")
 
-            val formatter = SimpleDateFormat("yyyy-MM-dd")
+                    val sDate = Calendar.getInstance()
+                    sDate.time = Date() // Using today's date
 
-            val sDate = Calendar.getInstance()
-            sDate.time = Date() // Using today's date
+                    val eDate = Calendar.getInstance()
+                    eDate.add(Calendar.DAY_OF_MONTH, period.value ?: 0)
 
-            val eDate = Calendar.getInstance()
-            eDate.add(Calendar.DATE, period.value!!)
+                    val startDate = formatter.format(sDate.time)
+                    val endDate = formatter.format(eDate.time)
 
-            val startDate = formatter.format(sDate.time)
-            val endDate = formatter.format(eDate.time)
+                    repository.retrieveSpecificAsteroids(
+                        startDate,
+                        endDate,
+                        period.value ?: 0,
+                        apiKey
+                    )
 
+                } else
+                    repository.retrieveAllAsteroids(period.value ?: 0)
 
-            //Retrieve Asteroids through Web Services for Weekly and Today Period
-            if (period.value!! >= 0) {
-                repository.refreshAsteroids(startDate, endDate, apiKey)
-
-                if (allAsteroid.value?.size!! > 1)
-                    status = "Success:${allAsteroid.value?.size}  Mars properties retrieved"
+                //Whether Asteroids were available in the Repository
+                if ((asteroids.value?.size ?: 0) > 0)
+                    _asteroidStatus.value = WebServiceStatus.DONE
                 else
-                    status = "Failure"
+                    _asteroidStatus.value = WebServiceStatus.ERROR
+
+            } catch (networkError: IOException) {
+                // Show a Toast error message and hide the progress bar.
+                //if (asteroids.value.isNullOrEmpty()) {
+                    _asteroidStatus.value = WebServiceStatus.ERROR
+                //}
+                Log.i("MainViewModel", "Network Issue")
+            } catch (e: Exception) {
+                //Exceptions to be handled separately for I/O or others
+                //if (asteroids.value.isNullOrEmpty())
+                _asteroidStatus.value = WebServiceStatus.ERROR
+                Log.i("MainViewModel", e.toString())
             }
         }
     }
-
-     fun getPictureOfDay(){
+    fun getPictureOfDay() {
         viewModelScope.launch {
+            _pictureOfDayStatus.value = WebServiceStatus.LOADING
             try {
-                var listResult =
-                    AsteroidApi.retrofitService.getPictureOfDay(apiKey)
-
-                if (listResult.size > 0) {
-                    _pictureOfDay.value = listResult[0]
-
-                    Log.i("Picture of Day","URL is:"+listResult[0].toString())
-                }
-                _pictureOfDayStatus.value = "Success: ${listResult.size}"
+                repository.retrievePictureOfDay(apiKey)
+                //Whether Asteroids were available in the Repository
+                if (pictureOfDay.value != null)
+                    _pictureOfDayStatus.value = WebServiceStatus.DONE
+                else
+                    _pictureOfDayStatus.value = WebServiceStatus.ERROR
+            } catch (networkError: IOException) {
+                _pictureOfDayStatus.value = WebServiceStatus.ERROR
+                Log.i("MainViewModel-PoD", "Network Issue")
             } catch (e: Exception) {
-                _pictureOfDayStatus.value = "Failure: ${e.message}"
+                //Exceptions to be handled separately for I/O or others
+                _pictureOfDayStatus.value = WebServiceStatus.ERROR
+                Log.i("MainViewModel-PoD", e.toString())
             }
         }
     }
 }
+
 
 class AsteroidViewModelFactory(private val repository: AsteroidRepository) :
     ViewModelProvider.Factory {

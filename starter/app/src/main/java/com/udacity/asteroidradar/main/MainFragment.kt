@@ -13,15 +13,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.udacity.asteroidradar.AsteroidAdapter
 import com.udacity.asteroidradar.AsteroidApplication
-import com.udacity.asteroidradar.PictureOfDay
 import com.udacity.asteroidradar.R
 import com.udacity.asteroidradar.databinding.FragmentMainBinding
 
 class MainFragment : Fragment() {
 
-    //    private val viewModel: MainViewModel by lazy {
-//        ViewModelProvider(this).get(MainViewModel::class.java)
-//    }
     private val viewModel: MainViewModel by viewModels {
         AsteroidViewModelFactory((requireNotNull(this.activity).application as AsteroidApplication).repository)
     }
@@ -29,47 +25,59 @@ class MainFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentMainBinding.inflate(inflater)
 
         binding.lifecycleOwner = this
         binding.viewModel = viewModel
 
+        //Get Recyclerview from Binding Object
         val recyclerView = binding.asteroidRecycler
 
+        //Setup Listener for Recyclerview Adapter
         val adapter = AsteroidAdapter(AsteroidAdapter.AsteroidListener { selectedAsteroid ->
             viewModel.onAsteroidClicked(selectedAsteroid)
             Toast.makeText(context, "${selectedAsteroid.id}", Toast.LENGTH_LONG).show()
         })
+
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(activity)
 
-        viewModel.selectedAsteroid.observe(this, Observer { selectedAsteroid ->
+        //Observe Selected Asteroid and Setup Navigation from Main Fragment to Detail Fragment on Change
+        viewModel.selectedAsteroid.observe(viewLifecycleOwner, Observer { selectedAsteroid ->
             selectedAsteroid?.let {
-                this.findNavController()
-                    .navigate(MainFragmentDirections.actionShowDetail(selectedAsteroid))
-                viewModel.onAsteroidDetailNavigated()
-            }
-        })
-
-        viewModel.allAsteroid.observe(viewLifecycleOwner, Observer {
-            var pic = viewModel.pictureOfDay.value
-            if (viewModel.allAsteroid.value?.size!! > 1 && pic != null) {
-                it?.let {
-                    adapter.addHeaderAndSubmitList(it, listOf(pic) as List<PictureOfDay>)
+                if (null != it) {
+                    this.findNavController()
+                        .navigate(MainFragmentDirections.actionShowDetail(selectedAsteroid))
+                    viewModel.onAsteroidDetailNavigated()
                 }
             }
         })
 
+        //Observe Asteroids List to refresh Recyclerview
+        viewModel.asteroids.observe(this, Observer {
+            val pic = viewModel.pictureOfDay.value
+            if (((viewModel.asteroids.value?.size?:0) > 0) && (pic != null)) {
+                it?.let {
+                    adapter.addHeaderAndSubmitList(it, listOf(pic))
+                }
+            }
+        })
+
+        //Observe Period for which Asteroids to be retrieved and refresh Recyclerview
         viewModel.period.observe(viewLifecycleOwner, Observer {
+            //Refresh Picture of Day
+            viewModel.getPictureOfDay()
+
+            //Refresh Asteroids List
             viewModel.getAsteroids()
         })
 
-        //Add Logout Menu Option
 
+        //Setup Overlay Menu
         val menuHost: MenuHost = requireActivity()
 
-        requireActivity().addMenuProvider(object : MenuProvider {
+        menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 // Add menu items here
                 menuInflater.inflate(R.menu.main_overflow_menu, menu)
@@ -79,7 +87,7 @@ class MainFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.show_all_menu -> {
-                        viewModel._period.value = 7
+                        viewModel._period.value = 6
                         true
                     }
                     R.id.show_rent_menu -> {
@@ -92,7 +100,6 @@ class MainFragment : Fragment() {
                     }
                     else -> false
                 }
-                return false
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
 

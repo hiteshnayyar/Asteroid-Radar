@@ -1,13 +1,9 @@
-package com.udacity.asteroidradar
+package com.udacity.asteroidradar.data
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Database(entities = [Asteroid::class], version = 5, exportSchema = false)
 abstract class AsteroidDatabase : RoomDatabase() {
@@ -19,7 +15,7 @@ abstract class AsteroidDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AsteroidDatabase? = null
 
-        fun getDatabase(context: Context, scope: CoroutineScope): AsteroidDatabase {
+        fun getDatabase(context: Context): AsteroidDatabase {
             // if the INSTANCE is not null, then return it,
             // if it is, then create the database
             return INSTANCE ?: synchronized(this) {
@@ -28,7 +24,7 @@ abstract class AsteroidDatabase : RoomDatabase() {
                     AsteroidDatabase::class.java,
                     "asteroid_database"
                 ).fallbackToDestructiveMigration()
-                .addCallback(AsteroidDatabaseCallback(scope))
+//                .addCallback(AsteroidDatabaseCallback(scope))
                 .build()
                 INSTANCE = instance
                 // return instance
@@ -37,10 +33,10 @@ abstract class AsteroidDatabase : RoomDatabase() {
         }
     }
 
-
+    /*
     private class AsteroidDatabaseCallback(
         private val scope: CoroutineScope
-    ) : RoomDatabase.Callback() {
+    ) : Callback() {
 
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
@@ -52,7 +48,6 @@ abstract class AsteroidDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(asteroidDatabaseDao: AsteroidDatabaseDao) {
-            /*
             // Add sample words
             var asteroid = Asteroid(1,"Hitesh","10/07/2023",5.7,1000.0,56.0,110.0,false)
             asteroidDatabaseDao.insert(asteroid)
@@ -70,8 +65,7 @@ abstract class AsteroidDatabase : RoomDatabase() {
             asteroid = Asteroid(5,"Gurpreet","30/07/2023",5.6,120.0,110.0,40.0,false)
             asteroidDatabaseDao.insert(asteroid)
             Log.i("AsteroidDatabase","Added 5th Asteroid")
-            */
 
         }
-    }
+    }*/
 }

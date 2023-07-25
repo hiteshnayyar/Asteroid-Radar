@@ -6,7 +6,7 @@
     <data>
         <variable
             name="asteroid"
-            type="com.udacity.asteroidradar.Asteroid" />
+            type="com.udacity.asteroidradar.data.Asteroid" />
         <variable
             name="clickListener"
             type="com.udacity.asteroidradar.AsteroidAdapter.AsteroidListener"/>
@@ -21,13 +21,14 @@
             android:id="@+id/txtCodeName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
             android:text="@{asteroid.codename}"
-            android:textColor="@color/default_text_color"
-            android:textSize="16dp"
+            android:textAlignment="viewStart"
+            android:contentDescription='@{"Code Name is " + asteroid.codename}'
+            style="@style/TextAppearance.Title"
             app:layout_constraintBottom_toTopOf="@+id/txtApproachDate"
             app:layout_constraintEnd_toStartOf="@+id/imgView"
             app:layout_constraintStart_toStartOf="parent"
@@ -39,13 +40,14 @@
             android:id="@+id/txtApproachDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
             android:text="@{asteroid.closeApproachDate}"
-            android:textColor="@color/default_text_color"
-            android:textSize="16dp"
+            android:textAlignment="viewStart"
+            android:contentDescription='@{"Close Approach Date is " + asteroid.closeApproachDate}'
+            style="@style/TextAppearance.Subtitle"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imgView"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,17 +56,17 @@
 
         <ImageView
             android:id="@+id/imgView"
-            app:statusIcon="@{asteroid.potentiallyHazardous}"
             android:layout_width="75dp"
             android:layout_height="75dp"
-            android:layout_marginTop="13dp"
-            android:layout_marginEnd="16dp"
-            android:paddingLeft="16dp"
-            android:paddingTop="16dp"
-            android:paddingRight="16dp"
-            android:paddingBottom="16dp"
+            android:layout_marginStart="@dimen/spacing_normal"
+            android:layout_marginEnd="@dimen/spacing_normal"
+            android:layout_marginTop="@dimen/spacing_normal"
+            android:layout_marginBottom="@dimen/spacing_normal"
+            android:padding="@dimen/spacing_large"
+            android:contentDescription='@{"Asteroid is " + (asteroid.potentiallyHazardous ? "Hazardous" : "Not Hazardous")}'
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:statusIcon="@{asteroid.potentiallyHazardous}"
             tools:srcCompat="@drawable/ic_status_potentially_hazardous" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
