@@ -1,10 +1,14 @@
 package com.udacity.asteroidradar
 
+import android.view.View
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
+import com.squareup.picasso.Picasso
+import com.udacity.asteroidradar.main.WebServiceStatus
 
 @BindingAdapter("statusIcon")
 fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
@@ -43,11 +47,50 @@ fun bindTextViewToDisplayVelocity(textView: TextView, number: Double) {
 }
 
 @BindingAdapter("imageUrl")
-fun bindImage(imgView: ImageView, imgUrl: String?) {
+fun bindImagePicasso(imgView: ImageView, imgUrl: String?) {
+    imgUrl?.let {
+        Picasso.with(imgView.context).load(imgUrl)
+            .placeholder(R.drawable.placeholder_picture_of_day)
+            .error(android.R.drawable.stat_notify_error )
+            .into(imgView);
+    }
+}
+@BindingAdapter("imageUri")
+fun bindImageGlide(imgView: ImageView, imgUrl: String?) {
     imgUrl?.let {
         val imgUri = imgUrl.toUri().buildUpon().scheme("https").build()
         Glide.with(imgView.context)
             .load(imgUri)
             .into(imgView)
+    }
+}
+@BindingAdapter("webServiceStatus")
+fun bindWebServiceStatus(statusProgressBar: ProgressBar, status: WebServiceStatus) {
+    when (status) {
+        WebServiceStatus.LOADING -> {
+            statusProgressBar.visibility = View.VISIBLE
+        }
+        WebServiceStatus.ERROR -> {
+            statusProgressBar.visibility = View.GONE
+        }
+        WebServiceStatus.DONE -> {
+            statusProgressBar.visibility = View.GONE
+        }
+    }
+}
+
+@BindingAdapter("internetStatus")
+fun bindWebServiceStatus(statusImageView: ImageView, status: WebServiceStatus) {
+    when (status) {
+        WebServiceStatus.LOADING -> {
+            statusImageView.visibility = View.GONE
+        }
+        WebServiceStatus.ERROR -> {
+            statusImageView.visibility = View.VISIBLE
+            statusImageView.setImageResource(android.R.drawable.stat_notify_error)
+        }
+        WebServiceStatus.DONE -> {
+            statusImageView.visibility = View.GONE
+        }
     }
 }

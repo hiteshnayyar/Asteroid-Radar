@@ -26,6 +26,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
             android:text="@{asteroid.codename}"
+            android:contentDescription='@{"Code Name is " + asteroid.codename}'
             android:textColor="@color/default_text_color"
             android:textSize="16dp"
             app:layout_constraintBottom_toTopOf="@+id/txtApproachDate"
@@ -44,6 +45,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
             android:text="@{asteroid.closeApproachDate}"
+            android:contentDescription='@{"Close Approach Date is " + asteroid.closeApproachDate}'
             android:textColor="@color/default_text_color"
             android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -55,6 +57,7 @@
         <ImageView
             android:id="@+id/imgView"
             app:statusIcon="@{asteroid.potentiallyHazardous}"
+            android:contentDescription='@{"Asteroid is " + (asteroid.potentiallyHazardous ? "Hazardous" : "Not Hazardous")}'
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:layout_marginTop="13dp"

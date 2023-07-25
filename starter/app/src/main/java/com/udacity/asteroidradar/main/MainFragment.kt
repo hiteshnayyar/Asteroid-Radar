@@ -52,9 +52,9 @@ class MainFragment : Fragment() {
             }
         })
 
-        viewModel.allAsteroid.observe(viewLifecycleOwner, Observer {
+        viewModel.asteroids.observe(viewLifecycleOwner, Observer {
             var pic = viewModel.pictureOfDay.value
-            if (viewModel.allAsteroid.value?.size!! > 1 && pic != null) {
+            if (viewModel.asteroids.value?.size!! > 1 && pic != null) {
                 it?.let {
                     adapter.addHeaderAndSubmitList(it, listOf(pic) as List<PictureOfDay>)
                 }
@@ -66,7 +66,6 @@ class MainFragment : Fragment() {
         })
 
         //Add Logout Menu Option
-
         val menuHost: MenuHost = requireActivity()
 
         requireActivity().addMenuProvider(object : MenuProvider {

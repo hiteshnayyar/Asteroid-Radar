@@ -1,46 +1,37 @@
 package com.udacity.asteroidradar
 
 import androidx.annotation.WorkerThread
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.main.MainViewModel
+import com.udacity.asteroidradar.main.WebServiceStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.util.*
-import java.util.concurrent.Flow
 
 // Declares the DAO as a private property in the constructor. Pass in the DAO
 // instead of the whole database, because you only need access to the DAO
-class AsteroidRepository (private val asteroidDao:AsteroidDatabaseDao){
+class AsteroidRepository(private val asteroidDao: AsteroidDatabaseDao) {
+    //Asteroid List to be observed and by Default, all asteroids in the DB will be shown
 
-    // Room executes all queries on a separate thread.
-    // Observed Flow will notify the observer when the data has changed.
-    val allAsteroids: LiveData<List<Asteroid>> = asteroidDao.getAllAsteroids()
+    //var asteroidList: LiveData<List<Asteroid>> = asteroidDao.getAsteroids(7)
+    var _asteroidList = MutableLiveData<List<Asteroid>>()
+    val asteroidList: LiveData<List<Asteroid>> get() = _asteroidList
 
-    // By default Room runs suspend queries off the main thread, therefore, we don't need to
-    // implement anything else to ensure we're not doing long running database work
-    // off the main thread.
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    suspend fun insert(asteroid: Asteroid) {
-        asteroidDao.insert(asteroid)
-    }
-    suspend fun refreshAsteroids(startDate: String, endDate: String, apiKey: String){
+    suspend fun refreshAsteroids(startDate: String, endDate: String, period: Int, apiKey: String) {
         withContext(Dispatchers.IO) {
-            //Clear Asteroids for Weekly/Today Selections
-            asteroidDao.clearAllAsteroids()
-            try {
+            //Retrieve Asteroids from the Web Services and Save in the repository
+            var jsonStr =
+                AsteroidApi.retrofitService.getAsteroids(startDate, endDate, apiKey)
 
-                var jsonStr =
-                    AsteroidApi.retrofitService.getAsteroids(startDate, endDate, apiKey)
-
-                var asteroidList = parseAsteroidsJsonResult(JSONObject(jsonStr))
-                asteroidDao.insertAll(asteroidList)
-            } catch (e: Exception) {
-                //_responseStatus.value = "Failure: ${e.message}"
-            }
-
+            var asteroids = parseAsteroidsJsonResult(JSONObject(jsonStr))
+            asteroidDao.insert(asteroids)
+            _asteroidList = asteroidDao.getAsteroids(period)
         }
     }
 }

@@ -26,7 +26,7 @@ interface AsteroidWebService {
                      @Query("api_key")  apiKey:String): String
 
     @GET("planetary/apod")
-    suspend fun getPictureOfDay(@Query("api_key") apiKey: String):List<PictureOfDay>
+    suspend fun getPictureOfDay(@Query("api_key") apiKey: String):String
 }
 
 object AsteroidApi {
