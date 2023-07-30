@@ -90,6 +90,7 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
                 // Show a Toast error message and hide the progress bar.
                 //if (asteroids.value.isNullOrEmpty()) {
                     _asteroidStatus.value = WebServiceStatus.ERROR
+
                 //}
                 Log.i("MainViewModel", "Network Issue")
             } catch (e: Exception) {
