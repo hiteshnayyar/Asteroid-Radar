@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.work.*
 import com.udacity.asteroidradar.data.AsteroidDatabase
 import com.udacity.asteroidradar.data.AsteroidRepository
+import com.udacity.asteroidradar.worker.DownloadAsteroids
 import com.udacity.asteroidradar.worker.RemoveStaleAsteroids
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -33,12 +34,18 @@ class AsteroidApplication : Application() {
                 //}
             }.build()
 
+        //To Test Time Interval has been kept 5 Minutes in place of 1 Day
         val repeatingRequest = PeriodicWorkRequestBuilder<RemoveStaleAsteroids>(1, TimeUnit.DAYS)
             .setConstraints(constraints)
             .build()
 
         WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
             RemoveStaleAsteroids.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            repeatingRequest)
+
+        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
+            DownloadAsteroids.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             repeatingRequest)
     }

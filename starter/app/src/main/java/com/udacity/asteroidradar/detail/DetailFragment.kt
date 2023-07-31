@@ -16,16 +16,24 @@ class DetailFragment : Fragment() {
         binding.lifecycleOwner = this
 
         val asteroid = DetailFragmentArgs.fromBundle(requireArguments()).selectedAsteroid
-        binding.asteroid = asteroid
 
+        if(asteroid.isPotentiallyHazardous)
+        {
+        binding.activityMainImageOfTheDay.contentDescription = "Asteroid is Potentially Hazardous"
+        }
+        else
+        {
+            binding.activityMainImageOfTheDay.contentDescription = "Asteroid is Not Hazardous"
+        }
+
+        //Setup click Listener for Help Button
         binding.helpButton.setOnClickListener {
             displayAstronomicalUnitExplanationDialog()
         }
-        binding.helpButton.contentDescription=getString(R.string.astronomica_unit_explanation)
-
         return binding.root
     }
 
+    //Setup Dialog for Help Button
     private fun displayAstronomicalUnitExplanationDialog() {
         val builder = AlertDialog.Builder(requireActivity())
             .setMessage(getString(R.string.astronomica_unit_explanation))

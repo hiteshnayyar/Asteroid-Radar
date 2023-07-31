@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.udacity.asteroidradar.*
 import com.udacity.asteroidradar.data.Asteroid
 import com.udacity.asteroidradar.data.AsteroidRepository
+import com.udacity.asteroidradar.data.Constants
 import com.udacity.asteroidradar.data.PictureOfDay
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -13,7 +14,7 @@ import java.util.*
 
 enum class WebServiceStatus { LOADING, ERROR, DONE }
 class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
-    val apiKey = "HhE8mIraVrXxh3aGMo17ly49qHnwCAb1yt7PHElH"
+   val apiKey = BuildConfig.NASA_API_KEY
 
     //Asteroid Web Service Status
     private val _asteroidStatus = MutableLiveData<WebServiceStatus>()
@@ -22,7 +23,6 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
     //Picture of Day Web Service Status
     private val _pictureOfDayStatus = MutableLiveData<WebServiceStatus>()
     val pictureOfDayStatus: LiveData<WebServiceStatus> get() = _pictureOfDayStatus
-
 
     //Period for which asteroids to be retrieved
     var _period = MutableLiveData<Int>()
@@ -34,9 +34,9 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
     val selectedAsteroid: LiveData<Asteroid?> get() = _selectedAsteroid
 
     init {
-        _period.value = 0
-        getPictureOfDay()
-        getAsteroids()
+        _asteroidStatus.value = WebServiceStatus.LOADING
+        _pictureOfDayStatus.value = WebServiceStatus.LOADING
+        _period.value = Constants.DEFAULT_END_DATE_DAYS -1
     }
 
     //Retrieves List of Asteroids
@@ -53,13 +53,14 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
         _selectedAsteroid.value = null
     }
 
+    //Retrieve Asteroids from Repository
     fun getAsteroids() {
         viewModelScope.launch {
             _asteroidStatus.value = WebServiceStatus.LOADING
             try {
                 if ((period.value ?: 0) >= 0) {
                     //Retrieve Asteroids for Current Day/Week
-                    val formatter = SimpleDateFormat("yyyy-MM-dd")
+                    val formatter = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
 
                     val sDate = Calendar.getInstance()
                     sDate.time = Date() // Using today's date
@@ -70,6 +71,7 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
                     val startDate = formatter.format(sDate.time)
                     val endDate = formatter.format(eDate.time)
 
+                    //Retrieve Asteriods from Repository
                     repository.retrieveSpecificAsteroids(
                         startDate,
                         endDate,
@@ -88,19 +90,17 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
 
             } catch (networkError: IOException) {
                 // Show a Toast error message and hide the progress bar.
-                //if (asteroids.value.isNullOrEmpty()) {
-                    _asteroidStatus.value = WebServiceStatus.ERROR
-
-                //}
-                Log.i("MainViewModel", "Network Issue")
+                _asteroidStatus.value = WebServiceStatus.ERROR
+                Log.i("MainViewModel","Network Error")
             } catch (e: Exception) {
                 //Exceptions to be handled separately for I/O or others
-                //if (asteroids.value.isNullOrEmpty())
                 _asteroidStatus.value = WebServiceStatus.ERROR
-                Log.i("MainViewModel", e.toString())
+                Log.i("MainViewModel","Other Error")
             }
         }
     }
+
+    //Retrieve Picture of Day from Repository
     fun getPictureOfDay() {
         viewModelScope.launch {
             _pictureOfDayStatus.value = WebServiceStatus.LOADING
@@ -112,17 +112,24 @@ class MainViewModel(private val repository: AsteroidRepository) : ViewModel() {
                 else
                     _pictureOfDayStatus.value = WebServiceStatus.ERROR
             } catch (networkError: IOException) {
-                _pictureOfDayStatus.value = WebServiceStatus.ERROR
+                if (pictureOfDay.value != null)
+                    _pictureOfDayStatus.value = WebServiceStatus.DONE
+                else
+                    _pictureOfDayStatus.value = WebServiceStatus.ERROR
                 Log.i("MainViewModel-PoD", "Network Issue")
             } catch (e: Exception) {
                 //Exceptions to be handled separately for I/O or others
-                _pictureOfDayStatus.value = WebServiceStatus.ERROR
+                if (pictureOfDay.value != null)
+                    _pictureOfDayStatus.value = WebServiceStatus.DONE
+                else
+                    _pictureOfDayStatus.value = WebServiceStatus.ERROR
                 Log.i("MainViewModel-PoD", e.toString())
             }
         }
     }
 }
 
+//Setup Factory for View Model
 
 class AsteroidViewModelFactory(private val repository: AsteroidRepository) :
     ViewModelProvider.Factory {

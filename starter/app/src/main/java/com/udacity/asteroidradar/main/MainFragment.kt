@@ -49,9 +49,14 @@ class MainFragment : Fragment() {
                 if (null != it) {
                     this.findNavController()
                         .navigate(MainFragmentDirections.actionShowDetail(selectedAsteroid))
+
                     viewModel.onAsteroidDetailNavigated()
                 }
             }
+        })
+
+        viewModel.pictureOfDayStatus.observe(this, Observer {
+            viewModel.getAsteroids()
         })
 
         //Observe Asteroids List to refresh Recyclerview
@@ -68,9 +73,6 @@ class MainFragment : Fragment() {
         viewModel.period.observe(viewLifecycleOwner, Observer {
             //Refresh Picture of Day
             viewModel.getPictureOfDay()
-
-            //Refresh Asteroids List
-            viewModel.getAsteroids()
         })
 
 

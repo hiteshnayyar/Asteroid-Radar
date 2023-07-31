@@ -7,17 +7,20 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-//https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=DEMO_KEY
+//Web Service URI: https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=DEMO_KEY
+
 fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
+    //Retrieve Object Near Earth Objects
     val nearEarthObjectsJson = jsonResult.getJSONObject("near_earth_objects")
 
     val asteroidList = ArrayList<Asteroid>()
-
+    //Setup Formatted Dates based on Start and End Dates
     val nextSevenDaysFormattedDates = getNextSevenDaysFormattedDates()
+    //Parse JSON Object to retrieve Asteroids
     for (formattedDate in nextSevenDaysFormattedDates) {
         if (nearEarthObjectsJson.has(formattedDate)) {
             val dateAsteroidJsonArray = nearEarthObjectsJson.getJSONArray(formattedDate)
-
+            //Loop through JSON Object Array to retrieve Asteriod from each JSON object
             for (i in 0 until dateAsteroidJsonArray.length()) {
                 val asteroidJson = dateAsteroidJsonArray.getJSONObject(i)
                 val id = asteroidJson.getLong("id")
@@ -37,6 +40,8 @@ fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
 
                 val asteroid = Asteroid(id, codename, formattedDate, absoluteMagnitude,
                     estimatedDiameter, relativeVelocity, distanceFromEarth, isPotentiallyHazardous)
+
+                //Append asteroid to the List
                 asteroidList.add(asteroid)
             }
         }

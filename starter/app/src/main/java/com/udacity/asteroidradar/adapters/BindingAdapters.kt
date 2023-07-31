@@ -8,6 +8,7 @@ import androidx.databinding.BindingAdapter
 import com.squareup.picasso.Picasso
 import com.udacity.asteroidradar.main.WebServiceStatus
 
+//Binding Adapter for Recyclerview Asteriod Status Icon in Main Fragment
 @BindingAdapter("statusIcon")
 fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
     if (isHazardous) {
@@ -17,6 +18,7 @@ fun bindAsteroidStatusImage(imageView: ImageView, isHazardous: Boolean) {
     }
 }
 
+//Binding Adapter for Asteriod Status Image in Detail Fragment
 @BindingAdapter("asteroidStatusImage")
 fun bindDetailsStatusImage(imageView: ImageView, isHazardous: Boolean) {
     if (isHazardous) {
@@ -26,24 +28,28 @@ fun bindDetailsStatusImage(imageView: ImageView, isHazardous: Boolean) {
     }
 }
 
+//Binding Adapter for Astronomical Unit
 @BindingAdapter("astronomicalUnitText")
 fun bindTextViewToAstronomicalUnit(textView: TextView, number: Double) {
     val context = textView.context
     textView.text = String.format(context.getString(R.string.astronomical_unit_format), number)
 }
 
+//Binding Adapter for Kms
 @BindingAdapter("kmUnitText")
 fun bindTextViewToKmUnit(textView: TextView, number: Double) {
     val context = textView.context
     textView.text = String.format(context.getString(R.string.km_unit_format), number)
 }
 
+//Binding Adapter for Velocity
 @BindingAdapter("velocityText")
 fun bindTextViewToDisplayVelocity(textView: TextView, number: Double) {
     val context = textView.context
     textView.text = String.format(context.getString(R.string.km_s_unit_format), number)
 }
 
+//Binding Adapter to Download and setup Picture of Day
 @BindingAdapter("imageUrl")
 fun bindImagePicasso(imgView: ImageView, imgUrl: String?) {
     imgUrl?.let {
@@ -63,6 +69,8 @@ fun bindImagePicasso(imgView: ImageView, imgUrl: String?) {
 //            .into(imgView)
 //    }
 //}
+
+//Binding Adapter for Asteroid Web Services Status
 @BindingAdapter("webServiceStatus")
 fun bindWebServiceStatus(statusProgressBar: ProgressBar, status: WebServiceStatus) {
     when (status) {
@@ -77,6 +85,7 @@ fun bindWebServiceStatus(statusProgressBar: ProgressBar, status: WebServiceStatu
         }
     }
 }
+//Binding Adapter for Picture of Day Web Services
 
 @BindingAdapter("internetStatus")
 fun bindWebServiceStatus(statusImageView: ImageView, status: WebServiceStatus) {

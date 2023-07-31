@@ -34,7 +34,6 @@
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:paddingBottom="@dimen/spacing_large"
-                    android:contentDescription="@string/network_issue"
                     app:asteroidStatusImage="@{asteroid.potentiallyHazardous}"
                     tools:srcCompat="@drawable/asteroid_safe" />
 
@@ -95,7 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/spacing_large"
-                        android:contentDescription="@string/whether_asteroid_is_hazardous"
+                        android:contentDescription="@string/astronomica_unit_explanation"
                         app:srcCompat="@drawable/ic_help_circle" />
 
                 </LinearLayout>

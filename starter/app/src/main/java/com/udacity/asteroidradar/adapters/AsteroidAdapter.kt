@@ -14,12 +14,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+//Setup Recycler View Item Type
 private val ITEM_VIEW_TYPE_HEADER = 0
 private val ITEM_VIEW_TYPE_ITEM = 1
 class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataItem,
         RecyclerView.ViewHolder>(AsteroidsComparator()) {
 
     private val adapterScope = CoroutineScope(Dispatchers.Default)
+    //Refresh Recycler View with Header and Asteroids
     fun addHeaderAndSubmitList(list: List<Asteroid>?, header: List<PictureOfDay>) {
         adapterScope.launch {
             val items = when (list) {
@@ -31,6 +33,8 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
             }
         }
     }
+
+    //Create View Holders for Picture of Day and each Asteriod
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType){
             ITEM_VIEW_TYPE_HEADER -> HeaderViewHolder.create(parent)
@@ -40,14 +44,15 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         }
     }
 
+    //Retrieve View Type
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is DataItem.Header -> ITEM_VIEW_TYPE_HEADER
-            //is DataItem.AsteroidItem -> ITEM_VIEW_TYPE_ITEM
             else -> ITEM_VIEW_TYPE_ITEM
         }
     }
 
+    //Bind Picture of Day and Asteriods View Holder with Recycler View
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is AsteroidViewHolder -> {
@@ -61,7 +66,7 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         }
     }
 
-
+    //Setup Asteriod View Holder
     class AsteroidViewHolder private constructor (val binding: AsteroidRecyclerBinding)
         : RecyclerView.ViewHolder(binding.root) {
         fun bind(clickListener: AsteroidListener,item: Asteroid) {
@@ -78,6 +83,7 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         }
     }
 
+    //Setup Header View Holder
     class HeaderViewHolder private constructor (val binding: HeaderRecyclerBinding)
         : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: PictureOfDay) {
@@ -93,6 +99,7 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         }
     }
 
+    //Compare Items in Recycler View using Diff Util
     class AsteroidsComparator : DiffUtil.ItemCallback<DataItem>() {
         override fun areItemsTheSame(oldItem: DataItem, newItem: DataItem): Boolean {
             return oldItem.id == newItem.id
@@ -103,10 +110,13 @@ class AsteroidAdapter(val clickListener: AsteroidListener) : ListAdapter<DataIte
         }
     }
 
+    //Setup Click Listener for Asteriods
     class AsteroidListener(val clickListener: (selectedAsteroid: Asteroid) -> Unit) {
         fun onClick(selectedAsteroid: Asteroid) = clickListener(selectedAsteroid)
     }
 }
+
+//Setup Sealed Class for Picture of Day and Asteriods
 sealed class DataItem {
     data class AsteroidItem(val asteroid: Asteroid): DataItem() {
         override val id = asteroid.id
